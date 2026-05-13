@@ -3,13 +3,17 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
-// Load environment variables
+// Load env variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
+
+// Connect MongoDB
+connectDB()
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch((err) => {
+    console.error('❌ MongoDB Connection Error:', err);
+  });
 
 // Middleware
 app.use(cors());
@@ -20,25 +24,39 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api', require('./routes/predictionRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
-// Health check
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Backend Running Successfully'
+  });
+});
+
+// Health route
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({
+    message: 'Route not found'
+  });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error('Server error:', err.stack);
-  res.status(500).json({ message: 'Internal server error' });
+  console.error('❌ Server Error:', err.stack);
+
+  res.status(500).json({
+    message: 'Internal server error'
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
 });
