@@ -1,0 +1,222 @@
+============================================================
+   MindGuard AI — Suicide Risk Detection Platform
+   COMPLETE SETUP INSTRUCTIONS
+============================================================
+
+This project has 2 modes to connect your AI models:
+  - OPTION A: Colab + ngrok (if your models run in Colab)
+  - OPTION B: HuggingFace Inference API (if models are on HF)
+
+============================================================
+STEP 1: INSTALL DEPENDENCIES
+============================================================
+
+Open terminal/cmd and run:
+
+  cd backend
+  npm install
+
+Open ANOTHER terminal and run:
+
+  cd frontend
+  npm install
+
+============================================================
+STEP 2: SETUP MONGODB (Free)
+============================================================
+
+1. Go to https://www.mongodb.com/cloud/atlas
+2. Sign up (free)
+3. Create a FREE cluster (M0)
+4. Database Access → Add user (username + password)
+5. Network Access → Allow from anywhere (0.0.0.0/0)
+6. Database → Connect → Connect your application
+7. Copy the connection string
+8. Replace <password> with your actual password
+9. Add database name before the "?":
+   mongodb+srv://user:pass@cluster0.xxx.mongodb.net/suicide-detection?retryWrites=true&w=majority
+
+============================================================
+STEP 3: CREATE backend/.env FILE
+============================================================
+
+Create a new file called ".env" inside the "backend" folder.
+Copy this content and fill in YOUR values:
+
+------------------------------------------------------------
+PORT=5000
+MONGO_URI=mongodb+srv://YOUR_USER:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/suicide-detection?retryWrites=true&w=majority
+JWT_SECRET=any_random_long_string_here_abc123xyz
+
+# Choose ONE option below:
+
+# OPTION A: If your models run in Colab
+COLAB_API_URL=https://your-ngrok-url.ngrok-free.app
+
+# OPTION B: If your models are on HuggingFace
+# HF_API_TOKEN=hf_your_token_here
+------------------------------------------------------------
+
+============================================================
+STEP 4A: CONNECT COLAB MODELS (Recommended)
+============================================================
+
+If your models run in Google Colab:
+
+1. Open Google Colab
+2. Copy ALL the code from "colab_server.py" file (included in this project)
+3. Get free ngrok token from https://dashboard.ngrok.com/get-started/your-authtoken
+4. Replace "YOUR_NGROK_TOKEN_HERE" in the code with your ngrok token
+5. Run the Colab cell
+6. You will see a URL like: https://abc123.ngrok-free.app
+7. Copy that URL into your backend/.env file:
+   COLAB_API_URL=https://abc123.ngrok-free.app
+8. KEEP THE COLAB TAB OPEN while using the website!
+
+============================================================
+STEP 4B: CONNECT HUGGINGFACE MODELS (Alternative)
+============================================================
+
+If your models work via HuggingFace Inference API:
+
+1. Go to https://huggingface.co/settings/tokens
+2. Create new token → Read access
+3. Copy token (starts with hf_...)
+4. Put in backend/.env:
+   HF_API_TOKEN=hf_your_token_here
+5. Remove or comment out the COLAB_API_URL line
+
+============================================================
+STEP 5: SEED ADMIN USER
+============================================================
+
+  cd backend
+  npm run seed
+
+This creates an admin account:
+  Email:    admin@example.com
+  Password: admin123
+
+============================================================
+STEP 6: START THE APPLICATION
+============================================================
+
+Terminal 1 (Backend):
+  cd backend
+  npm run dev
+
+  You should see:
+  🚀 Server running on port 5000
+  ✅ MongoDB Connected
+
+Terminal 2 (Frontend):
+  cd frontend
+  npm run dev
+
+  You should see:
+  VITE ready at http://localhost:5173/
+
+============================================================
+STEP 7: USE THE APPLICATION
+============================================================
+
+1. Open browser → http://localhost:5173
+2. Sign Up as User or Admin
+3. Login with your credentials
+
+AS USER:
+  - Go to Dashboard
+  - Type a sentence in the text box
+  - Click "Predict"
+  - See results from both AI models
+
+AS ADMIN:
+  - Go to Admin Panel
+  - See all user submissions
+  - See username, text, Model 1 & Model 2 predictions
+  - Add your annotation (final output)
+  - Click Save
+
+HISTORY:
+  - Users can see their past submissions
+  - Model predictions + Admin annotation visible
+
+============================================================
+PROJECT STRUCTURE
+============================================================
+
+MindGuard-AI-Project/
+├── colab_server.py          ← Copy this to Google Colab
+├── README.md
+├── SETUP_INSTRUCTIONS.txt   ← You are reading this
+│
+├── backend/
+│   ├── .env.example         ← Template for .env
+│   ├── package.json
+│   ├── server.js            ← Main server file
+│   ├── seedAdmin.js         ← Create admin account
+│   ├── config/db.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── predictionController.js  ← Connects to your models
+│   │   └── adminController.js
+│   ├── middleware/
+│   │   ├── authMiddleware.js
+│   │   └── adminMiddleware.js
+│   ├── models/
+│   │   ├── User.js
+│   │   └── Prediction.js
+│   └── routes/
+│       ├── authRoutes.js
+│       ├── predictionRoutes.js
+│       └── adminRoutes.js
+│
+└── frontend/
+    ├── package.json
+    ├── index.html
+    ├── vite.config.js
+    ├── tailwind.config.js
+    └── src/
+        ├── App.jsx
+        ├── main.jsx
+        ├── index.css
+        ├── pages/
+        │   ├── AuthPage.jsx         ← Login/Signup with role selector
+        │   ├── UserDashboard.jsx    ← Text input + prediction
+        │   ├── HistoryPage.jsx      ← Past analyses
+        │   ├── AdminDashboard.jsx   ← Admin review panel
+        │   └── NotFoundPage.jsx
+        ├── components/
+        │   ├── Navbar.jsx
+        │   ├── PredictionCard.jsx
+        │   ├── HistoryCard.jsx
+        │   ├── DisclaimerBanner.jsx
+        │   ├── EmptyState.jsx
+        │   └── LoadingSpinner.jsx
+        ├── context/AuthContext.jsx
+        ├── services/api.js
+        └── routes/
+            ├── ProtectedRoute.jsx
+            └── AdminRoute.jsx
+
+============================================================
+TROUBLESHOOTING
+============================================================
+
+ERROR: "Cannot connect to MongoDB"
+→ Check MONGO_URI in .env
+→ Check Network Access allows 0.0.0.0/0
+
+ERROR: "Error processing prediction"
+→ Make sure Colab notebook is running
+→ Check COLAB_API_URL in .env matches ngrok URL
+
+ERROR: "Models loading..."
+→ HuggingFace free models take 20-30 seconds first time
+→ Try again after 30 seconds
+
+ERROR: "Invalid email or password"
+→ Make sure you signed up first
+→ Admin login: admin@example.com / admin123
+
+============================================================
