@@ -25,6 +25,11 @@ const predictionSchema = new mongoose.Schema({
   },
   adminAnnotation: {
     type: String,
+    enum: ['', 'Suicidal', 'Non Suicidal', 'Not Defined'],
+    default: '',
+  },
+  adminFeedback: {
+    type: String,
     default: '',
   },
 }, {

@@ -44,6 +44,8 @@ export const getHistory = () => api.get('/history');
 
 // Admin
 export const getAllPredictions = (params) => api.get('/admin/all-predictions', { params });
-export const addAnnotation = (id, annotation) => api.put(`/admin/add-annotation/${id}`, { annotation });
+export const addAnnotation = (id, annotation, feedback) =>
+  api.put(`/admin/add-annotation/${id}`, { annotation, feedback });
+export const deletePrediction = (id) => api.delete(`/admin/delete-prediction/${id}`);
 
 export default api;
