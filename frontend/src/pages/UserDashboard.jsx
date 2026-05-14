@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { predictText } from '../services/api';
 import Navbar from '../components/Navbar';
-import PredictionCard from '../components/PredictionCard';
 import LoadingSpinner from '../components/LoadingSpinner';
-import DisclaimerBanner from '../components/DisclaimerBanner';
 
 const UserDashboard = () => {
   const [text, setText] = useState('');
-  const [result, setResult] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handlePredict = async (e) => {
     e.preventDefault();
@@ -26,12 +26,13 @@ const UserDashboard = () => {
     }
 
     setLoading(true);
-    setResult(null);
+    setSubmitted(false);
 
     try {
-      const res = await predictText(text);
-      setResult(res.data);
-      toast.success('Analysis complete!');
+      await predictText(text);
+      setSubmitted(true);
+      setText('');
+      toast.success('Text submitted for analysis!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error processing prediction. Please try again.');
     } finally {
@@ -41,7 +42,7 @@ const UserDashboard = () => {
 
   const handleClear = () => {
     setText('');
-    setResult(null);
+    setSubmitted(false);
   };
 
   return (
@@ -74,18 +75,8 @@ const UserDashboard = () => {
             Text Analysis Dashboard
           </h1>
           <p className="text-white/40 text-sm sm:text-base max-w-lg mx-auto">
-            Enter text below to analyze for potential risk indicators using advanced AI models.
+            Submit text below for analysis. Results will be saved to your history for review.
           </p>
-        </motion.div>
-
-        {/* Disclaimer */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
-          <DisclaimerBanner />
         </motion.div>
 
         {/* Input Section */}
@@ -142,14 +133,14 @@ const UserDashboard = () => {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Analyzing...
+                  Submitting...
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Predict
+                  Submit for Analysis
                 </>
               )}
             </button>
@@ -157,13 +148,60 @@ const UserDashboard = () => {
         </motion.form>
 
         {/* Loading */}
-        {loading && <LoadingSpinner text="Analyzing text with AI models..." />}
+        {loading && <LoadingSpinner text="Submitting text for AI analysis..." />}
 
-        {/* Results */}
-        {result && !loading && <PredictionCard result={result} />}
+        {/* Success — Text submitted */}
+        {submitted && !loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="glass-card p-8 sm:p-10 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.2 }}
+              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-neon-blue/20 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5"
+            >
+              <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </motion.div>
 
-        {/* Guide when no result */}
-        {!result && !loading && (
+            <h3 className="font-display font-bold text-xl text-white mb-2">
+              Analysis Submitted Successfully!
+            </h3>
+            <p className="text-white/40 text-sm mb-6 max-w-md mx-auto leading-relaxed">
+              Your text has been analyzed by our AI models and saved to your history.
+              View your results including model predictions, expert annotations, and feedback in the history page.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => navigate('/history')}
+                className="btn-neon flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                View History & Results
+              </button>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-medium hover:bg-white/10 hover:border-white/20 hover:text-white/80 transition-all duration-300 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Submit Another
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Guide when nothing submitted */}
+        {!submitted && !loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -180,9 +218,9 @@ const UserDashboard = () => {
               </svg>
             </motion.div>
             <p className="text-sm text-white/30">
-              Enter text above and click <span className="text-neon-blue font-medium">Predict</span> to get started
+              Enter text above and click <span className="text-neon-blue font-medium">Submit for Analysis</span> to get started
             </p>
-            <p className="text-xs text-white/20 mt-1">Two AI models will analyze your text simultaneously</p>
+            <p className="text-xs text-white/20 mt-1">Results will be saved to your history for review</p>
           </motion.div>
         )}
       </main>

@@ -31,13 +31,13 @@ const HistoryPage = () => {
       <Navbar />
       <div className="absolute inset-0 bg-radial-blue pointer-events-none" />
       <div className="absolute inset-0 bg-radial-purple pointer-events-none" />
-      <main className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <main className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <h1 className="font-display font-bold text-3xl sm:text-4xl gradient-text mb-3">Analysis History</h1>
-              <p className="text-white/40 text-sm">View your previous text analyses and expert review annotations.</p>
+              <p className="text-white/40 text-sm">View your submitted analyses with AI model predictions, expert annotations, and feedback.</p>
             </div>
             {predictions.length > 0 && (
               <div className="flex items-center gap-3">
@@ -49,6 +49,21 @@ const HistoryPage = () => {
             )}
           </div>
         </motion.div>
+
+        {/* Legend */}
+        {predictions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6 flex items-center gap-4 text-xs text-white/30"
+          >
+            <span className="text-white/50 font-medium">Legend:</span>
+            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-400" /> Suicidal</div>
+            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-400" /> Non Suicidal</div>
+            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-amber-400" /> Not Defined / Other</div>
+          </motion.div>
+        )}
 
         {/* Content */}
         {loading ? (
@@ -65,7 +80,7 @@ const HistoryPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {predictions.map((p, i) => <HistoryCard key={p._id} prediction={p} index={i} />)}
           </motion.div>
