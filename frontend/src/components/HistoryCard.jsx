@@ -13,6 +13,12 @@ const getLabelStyle = (label) => {
   return COLOR_MAP.safe;
 };
 
+const getAnnotationStyle = (annotation) => {
+  if (annotation === 'Suicidal') return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', dot: '#ef4444' };
+  if (annotation === 'Non Suicidal') return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', dot: '#10b981' };
+  return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', dot: '#f59e0b' };
+};
+
 const HistoryCard = ({ prediction, index = 0 }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -32,12 +38,12 @@ const HistoryCard = ({ prediction, index = 0 }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      whileHover={{ scale: 1.03, y: -6 }}
+      whileHover={{ scale: 1.02, y: -4 }}
       className="glass-card p-5 space-y-4 cursor-default group"
     >
       {/* Header with text and date */}
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-white/80 line-clamp-2 leading-relaxed flex-1">
+        <p className="text-sm text-white/80 line-clamp-3 leading-relaxed flex-1">
           &ldquo;{prediction.inputText}&rdquo;
         </p>
         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -78,16 +84,41 @@ const HistoryCard = ({ prediction, index = 0 }) => {
         </div>
       </div>
 
-      {/* Admin Annotation */}
+      {/* Admin Annotation & Feedback */}
       {prediction.adminAnnotation ? (
-        <div className="rounded-lg bg-purple-500/5 border border-purple-500/20 px-3 py-2.5">
-          <div className="flex items-center gap-1.5 mb-1">
-            <svg className="w-3 h-3 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-[10px] text-purple-400/60 font-medium">Expert Review</span>
-          </div>
-          <span className="text-xs text-purple-400 font-semibold">{prediction.adminAnnotation}</span>
+        <div className="space-y-2">
+          {/* Annotation Badge */}
+          {(() => {
+            const aStyle = getAnnotationStyle(prediction.adminAnnotation);
+            return (
+              <div className={`rounded-lg ${aStyle.bg} border ${aStyle.border} px-3 py-2.5`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <svg className="w-3 h-3 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-[10px] text-white/40 font-medium">Expert Review</span>
+                  </div>
+                  <span className={`text-xs font-bold ${aStyle.text}`}>
+                    {prediction.adminAnnotation}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Feedback Message */}
+          {prediction.adminFeedback && (
+            <div className="rounded-lg bg-purple-500/5 border border-purple-500/15 px-3 py-2.5">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <svg className="w-3 h-3 text-purple-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span className="text-[10px] text-purple-400/50 font-medium">Admin Feedback</span>
+              </div>
+              <p className="text-xs text-purple-300/70 leading-relaxed">{prediction.adminFeedback}</p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="rounded-lg bg-white/[0.02] border border-dashed border-white/10 px-3 py-2.5 flex items-center gap-2">
