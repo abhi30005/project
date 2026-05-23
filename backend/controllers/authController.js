@@ -16,18 +16,14 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all fields' });
     }
 
-    // Validate role — only 'user' or 'admin' allowed
-    const validRoles = ['user', 'admin'];
-    const selectedRole = validRoles.includes(role) ? role : 'user';
-
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
-    // Create user with selected role
-    const user = await User.create({ name, email, password, role: selectedRole });
+    // Create user (always defaults to 'user' role for security)
+    const user = await User.create({ name, email, password, role: 'user' });
 
     res.status(201).json({
       _id: user._id,
