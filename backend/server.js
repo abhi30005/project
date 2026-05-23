@@ -9,8 +9,9 @@ dotenv.config();
 const app = express();
 
 // Load environment
+const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : 'https://semesterproject-xi.vercel.app';
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'https://semesterproject-xi.vercel.app/',
+  frontendUrl,
   'http://localhost:3000',
   'http://localhost:5173',
 ];
